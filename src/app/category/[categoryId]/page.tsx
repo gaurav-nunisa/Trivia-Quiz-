@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import ScoreCounter from "@/app/store/scoreCounter";
 import Link from "next/link";
 
-const shuffleArray = (array) => {
+const shuffleArray = (array: string[]) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -16,14 +16,19 @@ const shuffleArray = (array) => {
 
 const CategoryPage = () => {
   const { categoryId } = useParams();
-  const { score, increaseScore, removeAllScore } = ScoreCounter();
+  const { score, increaseScore, } = ScoreCounter();
 
-  const [data, setData] = useState([]);
-  const [shuffledOptions, setShuffledOptions] = useState([]);
+  const [data, setData] = useState<{question: string, incorrect_answers: string[], correct_answer: string}[]>([]);
+  const [shuffledOptions, setShuffledOptions] = useState<string[][]>([]);
   const [loading, setLoading] = useState(true);
-  const [clickedOption, setClickedOption] = useState({}); // Store clicked option for each question
+  const [clickedOption, setClickedOption] = useState<{ [key: number]: string }>({}); // Store clicked option for each question
   const convertedId = Number(categoryId) || 9;
   console.log(score);
+
+  interface item{
+    incorrect_answers: string[];
+    correct_answer: string;
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +41,7 @@ const CategoryPage = () => {
         // Set data and shuffled options
         setData(responseData);
         setShuffledOptions(
-          responseData.map((item) =>
+          responseData.map((item : item) =>
             shuffleArray([...item.incorrect_answers, item.correct_answer])
           )
         );
@@ -48,7 +53,7 @@ const CategoryPage = () => {
     fetchData();
   }, [convertedId]);
 
-  const handleOptionClick = (questionIndex, option, correctAnswer) => {
+  const handleOptionClick = (questionIndex : number, option:string, correctAnswer:string) => {
     setClickedOption((prevClickedOption) => ({
       ...prevClickedOption,
       [questionIndex]: option, // Track clicked option for this question
@@ -69,7 +74,7 @@ const CategoryPage = () => {
             <div key={questionIndex} className="m-5">
               <p className="text-2xl font-bold">Question: {item.question}</p>
               <div className="my-5">
-                {shuffledOptions[questionIndex]?.map((option, optionIndex) => (
+                {shuffledOptions[questionIndex]?.map((option:string, optionIndex:number) => (
                   <button
                     key={optionIndex}
                     className={`m-2 p-4 gap-4 rounded-md ${
